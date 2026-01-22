@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="styles.css">
+    <title>Hogwarts Directory</title>
+    
+</head>
+<body>
+    <div>
+        <header class="header">
+            <!-- ヘッダーロゴ -->
+            <div class="photograph">
+            <h1>Harry　Potter</h1>
+            </div>
+
+            <nav class="nav-menu">
+                    <ul>
+                        <li> <a href="harrypotter.html">ホグワーツ名簿</a> </li>
+                        <li> <a href="chizu.html">忍びの地図</a> </li> 
+                        <li> <a href="">作品</a> </li>
+                        <li> <a href="">その他</a> </li>
+                    </ul>
+            </nav>
+           <div class="hamburger-menu">
+                        <input type="checkbox" id="button">
+                    <label for="button" class="menu-button"><span></span></label>
+                    <nav class="nav-smartphone">
+                    <ul>
+                        <li> <a href="harrypotter.html">ホグワーツ名簿</a> </li>
+                        <li> <a href="chizu.html">忍びの地図</a> </li> 
+                        <li> <a href="">作品</a> </li>
+                        <li> <a href="">その他</a> </li>
+                       
+                    </ul>
+                    </nav>
+                    </div>
+        </header>
+        <h2>ホグワーツ名簿</h2>
+        <div class="scroll-infinity">
+        <div class="scroll-infinity_wrap">
+            <ul class="scroll-infinity__list scroll-infinity__list--left">
+                <li class="scroll-infinity_ietm"><img src="photo/Harry Potter 1.jpg" width="200"></li>
+                <li class="scroll-infinity_ietm"><img src="photo/Ron Weasley 1.jpg" width="200"></li>
+                <li class="scroll-infinity_ietm"><img src="photo/Hermoine Granger 1.jpg" width="200"></li>
+                <li class="scroll-infinity_ietm"><img src="photo/Doraco1.jpg" width="200"></li>
+                <li class="scroll-infinity_ietm"><img src="photo/Harry Potter 1.jpg" width="200" ></li>
+                <li class="scroll-infinity_ietm"><img src="photo/Ron Weasley 1.jpg" width="200"></li>
+                <li class="scroll-infinity_ietm"><img src="photo/Hermoine Granger 1.jpg" width="200"></li>
+                <li class="scroll-infinity_ietm"><img src="photo/Doraco1.jpg" width="200"></li>
+                <li class="scroll-infinity_ietm"><img src="photo/Harry Potter 1.jpg" width="200" ></li>
+                <li class="scroll-infinity_ietm"><img src="photo/Ron Weasley 1.jpg" width="200"></li>
+                <li class="scroll-infinity_ietm"><img src="photo/Hermoine Granger 1.jpg" width="200"></li>
+                <li class="scroll-infinity_ietm"><img src="photo/Doraco1.jpg" width="200"></li>
+            </ul>
+
+            </ul>
+        </div>
+        </div>
+
+        <div class="search-container">
+            <p>ホグワーツ名簿へようこそ!!<br>ここでは、ハリー・ポッターの作品に登場する<br>キャラクターの写真や詳細情報を表示します！</p>
+            <p>▼検索したいキャラクター名を英語で入力してください。</p>
+            <label for="incharaname">キャラクター名：</label>
+            <input type="text" id="incharaname" placeholder="例: Harry Potter">
+            <input class="button" type="button" value="検索" onclick="searchCharacter()" >
+        
+        <div id="outcharaname"></div>
+        </div>
+
+    <hr>
+    
+    <h2 id="message">データを魔法で呼び出し中...</h2>
+
+    <div id="all-characters-list"></div>
+
+    <script>
+        // 設定：HP-APIのURL（生徒名簿を直接取得）
+        const api_url = "https://hp-api.onrender.com/api/characters/students";
+        let allCharacters = [];
+
+        // 1. データを取得する関数
+        async function getHogwartsData() {
+            try {
+                // 外部APIからデータを取得（awaitで待機）
+                const response = await fetch(api_url);
+                
+                if (!response.ok) {
+                    throw new Error("ネットワーク応答が正常ではありません");
+                }
+
+                // 取得したデータをJSON形式に変換して変数に保存
+                allCharacters = await response.json();
+                
+                // メッセージを更新
+                document.getElementById("message").innerText = "ハリー・ポッターの世界へようこそ！";
+                
+                // 全員表示の関数を呼び出す
+                displayAll();
+                
+            } catch (error) {
+                console.error("エラー:", error);
+                document.getElementById("message").innerText = "データの読み込みに失敗しました。ネット接続を確認してください。";
+            }
+        }
+
+        // 2. 全員を「名前」で表示する関数
+        function displayAll() {
+            const listArea = document.getElementById("all-characters-list");
+            listArea.innerHTML = ""; // 一旦中身を空にする
+
+            allCharacters.forEach(character => {
+                const item = document.createElement("div");
+                item.style.marginBottom = "20px"; // 簡易的な区切り
+
+                // 名前を表示
+                const nameTag = document.createElement("p");
+                nameTag.innerText = character.name;
+                item.appendChild(nameTag);
+
+                listArea.appendChild(item);
+            });
+        }
+
+        // 3. 検索して詳細を表示する関数
+        function searchCharacter() {
+            const inputName = document.getElementById('incharaname').value.trim();
+            const output = document.getElementById('outcharaname');
+            
+            // 入力された名前と一致する一人を探す（大文字小文字を区別しない）
+            const found = allCharacters.find(char => 
+                char.name.toLowerCase() === inputName.toLowerCase()
+            );
+
+            if (found) {
+                // 詳細情報を組み立てる
+                output.innerHTML = `
+                    <div class="detail-card ${found.house || '不明'}">
+                        <h2>${found.name}</h2>
+                        <img src="${found.image || ''}" width="150" alt="画像なし">
+                        <p>生年月日: ${found.dateOfBirth ||"不明"}</p>
+                        <p>寮: <span class="house ${found.house || "不明"}">${found.house || "不明"}</span></p>
+                        <p>杖: ${found.wand.wood || "不明"} / 芯: ${found.wand.core || "不明"}</p>
+                        <p>守護霊: ${found.patronus || "なし"}</p>
+                        <p>役者: ${found.actor}</p>
+                    </div>
+                `;
+            } else {
+                output.innerHTML = `<p style="color: red;">「${inputName}」は見つかりませんでした。</p>`;
+            }
+        }
+
+        // ページを読み込んだ時に実行
+        getHogwartsData();
+
+    </script>
+    </div>
+</body>
+ <footer>
+    <a href="#" class="btn-social-circle btn-social-circle--twitter">
+  <i class="fa fa-twitter"></i>
+</a>
+
+<!--以下facebook-->
+<a href="#" class="btn-social-circle btn-social-circle--facebook">
+  <i class="fa fa-facebook"></i>
+</a>
+
+<!--以下pocket-->
+<a href="#" class="btn-social-circle btn-social-circle--pocket">
+  <i class="fa fa-get-pocket"></i>
+</a>
+
+<!--以下feedly-->
+<a href="#" class="btn-social-circle btn-social-circle--feedly">
+  <i class="fa fa-rss"></i>
+</a>
+    <p>&copy; harrypotter</p>
+</footer>
+</html>
